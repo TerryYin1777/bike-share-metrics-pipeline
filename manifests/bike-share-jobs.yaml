@@ -1,0 +1,119 @@
+---
+-
+  template: bike-share-job.py.j2
+  dag_name: bike-share-metrics
+  schedule_interval: "@daily"
+  start_date: 2014-01-01
+  max_active_runs: 3
+  concurrency: 10
+  project_id: spark-bike-share
+
+  dataproc_list:
+    - id: 1
+      creation_operator_name: create_cluster_1
+      deletion_operator_name: delete_cluster_1
+      region: us-central1
+      num_workers: 2
+      worker_machine_type: n1-standard-2
+      master_machine_type: n1-standard-2
+      timeout_minute: 10
+      creation_upstreams: [trip_file_sensor]
+      creation_downstreams: [update_unique_user]
+      deletion_upstreams: [calc_duration]
+    - id: 2
+      creation_operator_name: create_cluster_2
+      deletion_operator_name: delete_cluster_2
+      region: us-central1
+      num_workers: 2
+      worker_machine_type: n1-standard-2
+      master_machine_type: n1-standard-2
+      timeout_minute: 10
+      creation_upstreams: [delete_cluster_1]
+      creation_downstreams: [day_1_retention]
+      deletion_upstreams: [day_1_retention]
+    - id: 3
+      creation_operator_name: create_cluster_3
+      deletion_operator_name: delete_cluster_3
+      region: us-central1
+      num_workers: 2
+      worker_machine_type: n1-standard-2
+      master_machine_type: n1-standard-2
+      timeout_minute: 10
+      creation_upstreams: [delete_cluster_1]
+      creation_downstreams: [day_3_retention]
+      deletion_upstreams: [day_3_retention]
+    - id: 4
+      creation_operator_name: create_cluster_4
+      deletion_operator_name: delete_cluster_4
+      region: us-central1
+      num_workers: 2
+      worker_machine_type: n1-standard-2
+      master_machine_type: n1-standard-2
+      timeout_minute: 10
+      creation_upstreams: [delete_cluster_1]
+      creation_downstreams: [day_7_retention]
+      deletion_upstreams: [day_7_retention]
+
+  job_list:
+    - job_name: update_unique_user
+      dataproc_id: 1
+      region: us-central1
+      main_class: com.terry.bigdata.process.UniqueUserUpdate
+      jars: |
+        ["gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"]
+      execution_timeout: 5
+      downstreams: [calc_duration]
+      args: |
+        ["--env", "test", "--start.date",
+        "{{ ti.xcom_pull(key='execution_date') }}"]
+    - job_name: calc_duration
+      dataproc_id: 1
+      region: us-central1
+      main_class: com.terry.bigdata.process.DurationMetric
+      jars: |
+        ["gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"]
+      execution_timeout: 5
+      args: |
+        ["--env", "test", "--start.date",
+        "{{ ti.xcom_pull(key='execution_date') }}"]
+    - job_name: day_1_retention
+      dataproc_id: 2
+      region: us-central1
+      main_class: com.terry.bigdata.process.RetentionMetrics
+      jars: |
+        ["gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"]
+      execution_timeout: 5
+      args: |
+        ["--env", "test", "--start.date",
+        "{{ ti.xcom_pull(key='execution_date') }}",
+        "--day.ago", "1"]
+    - job_name: day_3_retention
+      dataproc_id: 3
+      region: us-central1
+      main_class: com.terry.bigdata.process.RetentionMetrics
+      jars: |
+        ["gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"]
+      execution_timeout: 5
+      args: |
+        ["--env", "test", "--start.date",
+        "{{ ti.xcom_pull(key='execution_date') }}",
+        "--day.ago", "3"]
+    - job_name: day_7_retention
+      dataproc_id: 4
+      region: us-central1
+      main_class: com.terry.bigdata.process.RetentionMetrics
+      jars: |
+        ["gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"]
+      execution_timeout: 5
+      args: |
+        ["--env", "test", "--start.date",
+        "{{ ti.xcom_pull(key='execution_date') }}",
+        "--day.ago", "7"]
+
+  gcs_sensor_list:
+    - sensor_name: trip_file_sensor
+      pole_interval: 30
+      bucket: bike-share-data
+      object: test/bike/unique-user/_SUCCESS
+
+

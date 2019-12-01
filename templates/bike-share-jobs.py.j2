@@ -2,7 +2,7 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.contrib.operators.dataproc_operator import DataprocClusterCreateOperator,\
     DataprocClusterDeleteOperator, DataProcSparkOperator
-from airflow.utils.trigger_rule import TriggerRule
+from airflow.utils import trigger_rule
 from airflow.contrib.sensors.gcs_sensor import GoogleCloudStorageObjectSensor
 from time import time
 from datetime import datetime, timedelta
@@ -29,6 +29,12 @@ with DAG(
         'project_id':'{{ project_id }}'
     }) as dag:
 
+    push_cluster_name = PythonOperator(
+        task_id="push_cluster_name",
+        dag=dag,
+        provide_context=True,
+        python_callable=push_cluster_name
+    )
 
     {% for dataproc in dataproc_list %}
     {{ dataproc.creation_operator_name }} = DataprocClusterCreateOperator(
@@ -49,7 +55,7 @@ with DAG(
         cluster_name='{% raw %}{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}{% endraw %}'
                      + '{{ dataproc.id }}',
         region='{{ dataproc.region }}',
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE),
+        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes={{dataproc.timeout_minute}})
     )
     {% endfor %}
@@ -87,22 +93,22 @@ with DAG(
     {% for dataproc in dataproc_list %}
         {% if dataproc.creation_upstreams %}
             {% for upstream in dataproc.creation_upstreams %}
-    {{ dataproc.creation_operator_name }}.set_upstream(upstream)
+    {{ dataproc.creation_operator_name }}.set_upstream({{ upstream }})
             {% endfor %}
         {% endif %}
         {% if dataproc.creation_downstreams %}
-            {% for downstream in dataproc.creation.downstreams %}
-    {{ dataproc.creation_operator_name }}.set_downstream(downstream)
+            {% for downstream in dataproc.creation_downstreams %}
+    {{ dataproc.creation_operator_name }}.set_downstream({{ downstream }})
             {% endfor %}
         {% endif %}
         {% if dataproc.deletion_downstreams %}
             {% for downstream in dataproc.deletion_downstreams %}
-    {{ dataproc.deletion_operator_name }}.set_downstream(downstream)
+    {{ dataproc.deletion_operator_name }}.set_downstream({{ downstream }})
             {% endfor %}
         {% endif %}
         {% if dataproc.deletion_upstreams %}
             {% for upstream in dataproc.deletion_upstreams %}
-    {{ dataproc.deletion_operator_name }}.set_upstream(upstream)
+    {{ dataproc.deletion_operator_name }}.set_upstream({{ upstream }})
             {% endfor %}
         {% endif %}
     {% endfor %}
@@ -111,12 +117,12 @@ with DAG(
     {% for job in job_list %}
         {% if job.upstreams %}
             {% for upstream in job.upstreams %}
-    {{ job.job_name }}.set_upstream(upstream)
+    {{ job.job_name }}.set_upstream({{ upstream }})
             {% endfor %}
         {% endif %}
         {% if job.downstreams %}
             {% for downstream in job.downstreams %}
-    {{ job.job_name }}.set_downstream(downstream)
+    {{ job.job_name }}.set_downstream({{ downstream }})
             {% endfor %}
         {% endif %}
     {% endfor %}

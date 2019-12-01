@@ -1,6 +1,6 @@
 ---
 -
-  template: bike-share-job.py.j2
+  template: bike-share-jobs.py.j2
   dag_name: bike-share-metrics
   schedule_interval: "@daily"
   start_date: 2014-01-01
@@ -65,7 +65,7 @@
       downstreams: [calc_duration]
       args: |
         ["--env", "test", "--start.date",
-        "{{ ti.xcom_pull(key='execution_date') }}"]
+        "{{ (execution_date).strftime('Y-%m-%d') }}",]
     - job_name: calc_duration
       dataproc_id: 1
       region: us-central1
@@ -75,7 +75,7 @@
       execution_timeout: 5
       args: |
         ["--env", "test", "--start.date",
-        "{{ ti.xcom_pull(key='execution_date') }}"]
+        "{{ (execution_date).strftime('Y-%m-%d') }}",]
     - job_name: day_1_retention
       dataproc_id: 2
       region: us-central1
@@ -85,7 +85,7 @@
       execution_timeout: 5
       args: |
         ["--env", "test", "--start.date",
-        "{{ ti.xcom_pull(key='execution_date') }}",
+        "{{ (execution_date).strftime('Y-%m-%d') }}",
         "--day.ago", "1"]
     - job_name: day_3_retention
       dataproc_id: 3
@@ -96,7 +96,7 @@
       execution_timeout: 5
       args: |
         ["--env", "test", "--start.date",
-        "{{ ti.xcom_pull(key='execution_date') }}",
+        "{{ (execution_date).strftime('Y-%m-%d') }}",
         "--day.ago", "3"]
     - job_name: day_7_retention
       dataproc_id: 4
@@ -107,12 +107,12 @@
       execution_timeout: 5
       args: |
         ["--env", "test", "--start.date",
-        "{{ ti.xcom_pull(key='execution_date') }}",
+        "{{ (execution_date).strftime('Y-%m-%d') }}",
         "--day.ago", "7"]
 
   gcs_sensor_list:
     - sensor_name: trip_file_sensor
-      pole_interval: 30
+      poke_interval: 30
       bucket: bike-share-data
       object: test/bike/unique-user/_SUCCESS
 

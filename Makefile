@@ -4,10 +4,10 @@ all : render
 .PHONY : all
 
 render:
-    ( \
-        mkdir -p deployment-dags; \
-        python render.py templates/ manifests/ deployment-dags/; \
-    ) \
+	( \
+		mkdir -p deployment-dags; \
+		python render.py templates/ manifests/ deployment-dags/; \
+	) \
 
 clean:
-    rm -rf deployment-dags
+	rm -rf deployment-dags

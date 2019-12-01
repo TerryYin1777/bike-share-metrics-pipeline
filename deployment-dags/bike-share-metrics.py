@@ -19,7 +19,7 @@ def push_cluster_name(**kwargs):
 with DAG(dag_id=dag_name,
          schedule_interval="@daily",
          start_date=datetime.strptime("2014-01-01", "%Y-%m-%d"),
-         max_active_runs=3,
+         max_active_runs=1,
          concurrency=10,
          default_args={'project_id': 'spark-bike-share'}) as dag:
 
@@ -33,7 +33,7 @@ with DAG(dag_id=dag_name,
         project_id='spark-bike-share',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '1',
+        + '-' + '1',
         region='us-central1',
         num_workers=2,
         worker_machine_type='n1-standard-2',
@@ -45,7 +45,7 @@ with DAG(dag_id=dag_name,
         project_id='spark-bike-share',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '1',
+        + '-' + '1',
         region='us-central1',
         trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=10))
@@ -55,7 +55,7 @@ with DAG(dag_id=dag_name,
         project_id='spark-bike-share',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '2',
+        + '-' + '2',
         region='us-central1',
         num_workers=2,
         worker_machine_type='n1-standard-2',
@@ -67,7 +67,7 @@ with DAG(dag_id=dag_name,
         project_id='spark-bike-share',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '2',
+        + '-' + '2',
         region='us-central1',
         trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=10))
@@ -77,7 +77,7 @@ with DAG(dag_id=dag_name,
         project_id='spark-bike-share',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '3',
+        + '-' + '3',
         region='us-central1',
         num_workers=2,
         worker_machine_type='n1-standard-2',
@@ -89,7 +89,7 @@ with DAG(dag_id=dag_name,
         project_id='spark-bike-share',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '3',
+        + '-' + '3',
         region='us-central1',
         trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=10))
@@ -99,7 +99,7 @@ with DAG(dag_id=dag_name,
         project_id='spark-bike-share',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '4',
+        + '-' + '4',
         region='us-central1',
         num_workers=2,
         worker_machine_type='n1-standard-2',
@@ -111,7 +111,7 @@ with DAG(dag_id=dag_name,
         project_id='spark-bike-share',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '4',
+        + '-' + '4',
         region='us-central1',
         trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=10))
@@ -120,14 +120,14 @@ with DAG(dag_id=dag_name,
         "--env",
         "test",
         "--start.date",
-        "{{ (execution_date).strftime('Y-%m-%d') }}",
+        "{{ (execution_date).strftime('%Y-%m-%d') }}",
     ]
 
     update_unique_user = DataProcSparkOperator(
         task_id='update_unique_user',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '1',
+        + '-' + '1',
         job_name=dag_name + '-' + 'update_unique_user',
         region='us-central1',
         main_class='com.terry.bigdata.process.UniqueUserUpdate',
@@ -141,14 +141,14 @@ with DAG(dag_id=dag_name,
         "--env",
         "test",
         "--start.date",
-        "{{ (execution_date).strftime('Y-%m-%d') }}",
+        "{{ (execution_date).strftime('%Y-%m-%d') }}",
     ]
 
     calc_duration = DataProcSparkOperator(
         task_id='calc_duration',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '1',
+        + '-' + '1',
         job_name=dag_name + '-' + 'calc_duration',
         region='us-central1',
         main_class='com.terry.bigdata.process.DurationMetric',
@@ -160,14 +160,14 @@ with DAG(dag_id=dag_name,
 
     args = [
         "--env", "test", "--start.date",
-        "{{ (execution_date).strftime('Y-%m-%d') }}", "--day.ago", "1"
+        "{{ (execution_date).strftime('%Y-%m-%d') }}", "--day.ago", "1"
     ]
 
     day_1_retention = DataProcSparkOperator(
         task_id='day_1_retention',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '2',
+        + '-' + '2',
         job_name=dag_name + '-' + 'day_1_retention',
         region='us-central1',
         main_class='com.terry.bigdata.process.RetentionMetrics',
@@ -179,14 +179,14 @@ with DAG(dag_id=dag_name,
 
     args = [
         "--env", "test", "--start.date",
-        "{{ (execution_date).strftime('Y-%m-%d') }}", "--day.ago", "3"
+        "{{ (execution_date).strftime('%Y-%m-%d') }}", "--day.ago", "3"
     ]
 
     day_3_retention = DataProcSparkOperator(
         task_id='day_3_retention',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '3',
+        + '-' + '3',
         job_name=dag_name + '-' + 'day_3_retention',
         region='us-central1',
         main_class='com.terry.bigdata.process.RetentionMetrics',
@@ -198,14 +198,14 @@ with DAG(dag_id=dag_name,
 
     args = [
         "--env", "test", "--start.date",
-        "{{ (execution_date).strftime('Y-%m-%d') }}", "--day.ago", "7"
+        "{{ (execution_date).strftime('%Y-%m-%d') }}", "--day.ago", "7"
     ]
 
     day_7_retention = DataProcSparkOperator(
         task_id='day_7_retention',
         cluster_name=
         '{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}'
-        + '4',
+        + '-' + '4',
         job_name=dag_name + '-' + 'day_7_retention',
         region='us-central1',
         main_class='com.terry.bigdata.process.RetentionMetrics',

@@ -41,7 +41,7 @@ with DAG(
         task_id='{{ dataproc.creation_operator_name }}',
         project_id='{{ project_id }}',
         cluster_name='{% raw %}{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}{% endraw %}'
-                     + '{{ dataproc.id }}',
+                     + '-' + '{{ dataproc.id }}',
         region='{{ dataproc.region }}',
         num_workers={{ dataproc.num_workers }},
         worker_machine_type='{{ dataproc.worker_machine_type }}',
@@ -53,7 +53,7 @@ with DAG(
         task_id='{{ dataproc.deletion_operator_name }}',
         project_id='{{ project_id }}',
         cluster_name='{% raw %}{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}{% endraw %}'
-                     + '{{ dataproc.id }}',
+                     + '-' + '{{ dataproc.id }}',
         region='{{ dataproc.region }}',
         trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes={{dataproc.timeout_minute}})
@@ -66,7 +66,7 @@ with DAG(
     {{ job.job_name }} = DataProcSparkOperator(
         task_id='{{ job.job_name }}',
         cluster_name='{% raw %}{{ ti.xcom_pull(key="cluster_name", task_ids="push_cluster_name") }}{% endraw %}'
-                     + '{{ job.dataproc_id }}',
+                     + '-' + '{{ job.dataproc_id }}',
         job_name=dag_name + '-' + '{{ job.job_name }}',
         region='{{ job.region }}',
         main_class='{{ job.main_class }}',

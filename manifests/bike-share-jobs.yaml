@@ -28,7 +28,7 @@
       worker_machine_type: n1-standard-2
       master_machine_type: n1-standard-2
       timeout_minute: 10
-      creation_upstreams: [delete_cluster_1]
+      creation_upstreams: [calc_duration]
       creation_downstreams: [day_1_retention]
       deletion_upstreams: [day_1_retention]
     - id: 3
@@ -50,7 +50,7 @@
       worker_machine_type: n1-standard-2
       master_machine_type: n1-standard-2
       timeout_minute: 10
-      creation_upstreams: [delete_cluster_1]
+      creation_upstreams: [delete_cluster_2]
       creation_downstreams: [day_7_retention]
       deletion_upstreams: [day_7_retention]
 

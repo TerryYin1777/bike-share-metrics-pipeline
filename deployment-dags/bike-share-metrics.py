@@ -227,7 +227,7 @@ with DAG(dag_id=dag_name,
 
     delete_cluster_1.set_upstream(calc_duration)
 
-    create_cluster_2.set_upstream(calc_duration)
+    create_cluster_2.set_upstream(delete_cluster_1)
 
     create_cluster_2.set_downstream(day_1_retention)
 
@@ -240,6 +240,8 @@ with DAG(dag_id=dag_name,
     delete_cluster_3.set_upstream(day_3_retention)
 
     create_cluster_4.set_upstream(delete_cluster_2)
+
+    create_cluster_4.set_upstream(delete_cluster_3)
 
     create_cluster_4.set_downstream(day_7_retention)
 

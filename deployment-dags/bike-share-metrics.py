@@ -38,7 +38,6 @@ with DAG(dag_id=dag_name,
         num_workers=2,
         worker_machine_type='n1-standard-2',
         master_machine_type='n1-standard-2',
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=10))
     create_cluster_1.set_upstream(push_cluster_name)
     delete_cluster_1 = DataprocClusterDeleteOperator(
@@ -61,7 +60,6 @@ with DAG(dag_id=dag_name,
         num_workers=2,
         worker_machine_type='n1-standard-2',
         master_machine_type='n1-standard-2',
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=10))
     create_cluster_2.set_upstream(push_cluster_name)
     delete_cluster_2 = DataprocClusterDeleteOperator(
@@ -84,7 +82,6 @@ with DAG(dag_id=dag_name,
         num_workers=2,
         worker_machine_type='n1-standard-2',
         master_machine_type='n1-standard-2',
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=10))
     create_cluster_3.set_upstream(push_cluster_name)
     delete_cluster_3 = DataprocClusterDeleteOperator(
@@ -107,7 +104,6 @@ with DAG(dag_id=dag_name,
         num_workers=2,
         worker_machine_type='n1-standard-2',
         master_machine_type='n1-standard-2',
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=10))
     create_cluster_4.set_upstream(push_cluster_name)
     delete_cluster_4 = DataprocClusterDeleteOperator(
@@ -138,7 +134,6 @@ with DAG(dag_id=dag_name,
         dataproc_spark_jars=[
             "gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"
         ],
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=5),
         arguments=args)
 
@@ -160,7 +155,6 @@ with DAG(dag_id=dag_name,
         dataproc_spark_jars=[
             "gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"
         ],
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=5),
         arguments=args)
 
@@ -180,7 +174,6 @@ with DAG(dag_id=dag_name,
         dataproc_spark_jars=[
             "gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"
         ],
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=5),
         arguments=args)
 
@@ -200,7 +193,6 @@ with DAG(dag_id=dag_name,
         dataproc_spark_jars=[
             "gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"
         ],
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=5),
         arguments=args)
 
@@ -220,7 +212,6 @@ with DAG(dag_id=dag_name,
         dataproc_spark_jars=[
             "gs://bike-share-data/test/jar/BikeShareMetrics-assembly-0.1.jar"
         ],
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes=5),
         arguments=args)
 
@@ -242,13 +233,11 @@ with DAG(dag_id=dag_name,
 
     delete_cluster_2.set_upstream(day_1_retention)
 
-    create_cluster_3.set_upstream(delete_cluster_1)
+    create_cluster_3.set_upstream(delete_cluster_2)
 
     create_cluster_3.set_downstream(day_3_retention)
 
     delete_cluster_3.set_upstream(day_3_retention)
-
-    create_cluster_4.set_upstream(delete_cluster_2)
 
     create_cluster_4.set_upstream(delete_cluster_3)
 

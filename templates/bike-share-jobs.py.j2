@@ -46,7 +46,6 @@ with DAG(
         num_workers={{ dataproc.num_workers }},
         worker_machine_type='{{ dataproc.worker_machine_type }}',
         master_machine_type='{{ dataproc.master_machine_type }}',
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes={{ dataproc.timeout_minute }})
     )
     {{ dataproc.creation_operator_name }}.set_upstream(push_cluster_name)
@@ -72,7 +71,6 @@ with DAG(
         region='{{ job.region }}',
         main_class='{{ job.main_class }}',
         dataproc_spark_jars={{ job.jars }},
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE,
         execution_timeout=timedelta(minutes={{ job.execution_timeout }}),
         arguments=args)
     {% endfor %}
